@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import tkinter as tk
+import icon
 
 class MainWindow(tk.Frame):
     def __init__(self, parent):
@@ -17,4 +18,9 @@ def create_window():
     root = tk.Tk()
     root.geometry('1280x720+200+200')
     app = MainWindow(root)
+
+    icon.create_icon()
+    root.iconbitmap('flac-librarian.ico')
+    icon.delete_icon()
+
     root.mainloop()

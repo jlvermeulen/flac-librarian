@@ -13,7 +13,7 @@
         {
             "name": "Python Project",
             "selector": "source.python",
-            "cmd": "pyinstaller --distpath $project_path/dist --workpath $project_path/build --specpath $project_path/build --onefile --noconfirm --clean flac_librarian.py",
+            "cmd": "pyinstaller --distpath $project_path/dist --workpath $project_path/build --specpath $project_path/build --icon $project_path/data/flac-librarian.ico --onefile --noconfirm --clean flac_librarian.py",
 
             "variants":
             [
