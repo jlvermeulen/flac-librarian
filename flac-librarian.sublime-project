@@ -12,7 +12,17 @@
     [
         {
             "name": "Python Project",
-            "shell_cmd": "python flac_librarian.py"
+            "selector": "source.python",
+            "cmd": "pyinstaller --distpath $project_path/dist --workpath $project_path/build --specpath $project_path/build --onefile --noconfirm --clean flac_librarian.py",
+
+            "variants":
+            [
+                {
+                    "name": "Run",
+                    "cmd": "$project_path/dist/flac_librarian",
+                    "working_dir": "$project_path/dist"
+                }
+            ]
         }
     ]
 }
