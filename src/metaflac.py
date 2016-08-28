@@ -3,7 +3,7 @@
 import subprocess
 
 def get_attribute(name, file):
-    result = subprocess.run(['metaflac', '--show-tag=' + name, file], stdout = subprocess.PIPE)
+    result = subprocess.run(['metaflac', '--show-tag=' + name, file], stdout = subprocess.PIPE, shell = True)
     value  = result.stdout.decode('utf-8')
 
     assert value.startswith(name + '=')
