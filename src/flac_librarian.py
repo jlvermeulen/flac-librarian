@@ -1,8 +1,11 @@
 #! /usr/bin/env python
 
 import tkinter as tk
+from tkinter import messagebox
+
 import icon, metaflac
-import os
+
+import os.path, glob
 
 class MainWindow(tk.Frame):
     def __init__(self, parent):
@@ -11,7 +14,10 @@ class MainWindow(tk.Frame):
         self.init()
 
     def init(self):
-        self.labels_initialised = False
+        self.tags = ['tracknumber', 'title', 'artist', 'album']
+        self.tag_data = {}
+        for tag in self.tags:
+            self.tag_data[tag] = []
 
         self.parent.title('FLAC Librarian 0.1')
         self.pack(fill = tk.BOTH, expand = 1)
@@ -19,41 +25,48 @@ class MainWindow(tk.Frame):
         self.frame = tk.Frame(self)
         self.frame.pack(fill = tk.BOTH, expand = 1)
 
-        self.button = tk.Button(self.frame, text = "Read data", command = self.show_data)
-        self.button.grid(row = 0)
+        self.button = tk.Button(self.frame, text = "Read data", command = self.fill_table)
+        self.button.grid(row = 0, column = 0, sticky = 'w')
+
+        self.path_entry = tk.Entry(self.frame, width = 100)
+        self.path_entry.grid(row = 0, column = 1, sticky = 'w', columnspan = 10, padx = 10)
 
         self.track_label  = tk.Label(self.frame, text = 'Track number:')
         self.title_label  = tk.Label(self.frame, text = 'Title:')
         self.artist_label = tk.Label(self.frame, text = 'Artist:')
         self.album_label  = tk.Label(self.frame, text = 'Album:')
 
-        self.track_label.grid(row = 0, column = 1, sticky = 'w')
-        self.title_label.grid(row = 1, column = 1, sticky = 'w')
-        self.artist_label.grid(row = 2, column = 1, sticky = 'w')
-        self.album_label.grid(row = 3, column = 1, sticky = 'w')
+        self.track_label.grid(row = 1, column = 0, sticky = 'w', padx = 10)
+        self.title_label.grid(row = 1, column = 1, sticky = 'w', padx = 10)
+        self.artist_label.grid(row = 1, column = 2, sticky = 'w', padx = 10)
+        self.album_label.grid(row = 1, column = 3, sticky = 'w', padx = 10)
 
-    def show_data(self):
-        if self.labels_initialised:
+    def fill_table(self):
+        path = self.path_entry.get()
+        if not os.path.isdir(path):
+            tk.messagebox.showerror('Invalid path', 'Please give a path to an existing directory!')
             return
 
-        artist = metaflac.get_attribute('artist', 'test.flac')
-        title = metaflac.get_attribute('title', 'test.flac')
-        album = metaflac.get_attribute('album', 'test.flac')
-        tracknumber = metaflac.get_attribute('tracknumber', 'test.flac')
+        self.gather_data(path)
+        self.show_data()
 
-        self.track_value  = tk.Label(self.frame, text = tracknumber)
-        self.title_value  = tk.Label(self.frame, text = title)
-        self.artist_value = tk.Label(self.frame, text = artist)
-        self.album_value  = tk.Label(self.frame, text = album)
+    def gather_data(self, path):
+        for file in glob.glob(os.path.join(path, '*.flac')):
+            for tag in self.tags:
+                value = metaflac.get_attribute(tag, file)
+                self.tag_data[tag].append(value)
 
-        self.track_value.grid(row = 0, column = 2, sticky = 'w')
-        self.title_value.grid(row = 1, column = 2, sticky = 'w')
-        self.artist_value.grid(row = 2, column = 2, sticky = 'w')
-        self.album_value.grid(row = 3, column = 2, sticky = 'w')
+    def show_data(self):
+        i = 0
+        for tag in self.tags:
+            j = 2
+            for value in self.tag_data[tag]:
+                label = tk.Label(self.frame, text = value)
+                label.grid(row = j, column = i, sticky = 'w', padx = 10)
+                j = j + 1
+            i = i + 1
 
-        self.labels_initialised = True
-
-if __name__ == '__main__':
+def main():
     root = tk.Tk()
     root.geometry('1280x720+200+200')
 
@@ -64,3 +77,6 @@ if __name__ == '__main__':
     icon.delete_icon()
 
     root.mainloop()
+
+if __name__ == '__main__':
+    main()
