@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 import icon, metaflac
 
-import os.path, glob
+import os.path, glob, cProfile
 
 class MainWindow(tk.Frame):
     def __init__(self, parent):
@@ -78,5 +78,9 @@ def main():
 
     root.mainloop()
 
+profile = True
 if __name__ == '__main__':
-    main()
+    if profile:
+        cProfile.run('main()')
+    else:
+        main()

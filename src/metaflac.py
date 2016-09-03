@@ -1,16 +1,23 @@
 #! /usr/bin/env python3
 
-import subprocess, os.path
+import subprocess, os, os.path
 
 def get_attribute(name, file):
-    result = subprocess.run(['metaflac', '--show-tag=' + name, file], stdout = subprocess.PIPE, stderr = subprocess.PIPE, stdin = subprocess.PIPE, shell = True)
+    info = None
+    if os.name == 'nt':
+        info = subprocess.STARTUPINFO()
+        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        info.wShowWindow = subprocess.SW_HIDE
+
+    process = subprocess.Popen(['metaflac', '--show-tag=' + name, file], stdout = subprocess.PIPE, startupinfo = info)
+    result = process.communicate()[0]
 
     try:
-        value = result.stdout.decode('utf-8')
+        value = result.decode('utf-8')
     except:
-        value = result.stdout.decode('iso-8859-1')
+        value = result.decode('iso-8859-1')
 
-    assert result.returncode == 0
+    assert process.returncode == 0
     assert value.lower().startswith(name + '=')
 
     return value[len(name) + 1:].rstrip()
