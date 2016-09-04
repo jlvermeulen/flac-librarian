@@ -3,17 +3,17 @@
 import tkinter as tk
 from tkinter import messagebox
 
-import icon, metaflac
+import icon, metaflac, database
 
 import os.path, glob, cProfile
+
+pattern = '(.+, )?(.+)( in )([A-G](-sharp|-flat)? (major|minor)) (Op. \d+( (No. \d+))?)( - ([IVXLCDM]+). (.+)+)?'
 
 class MainWindow(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.init()
 
-    def init(self):
         self.tags = ['tracknumber', 'title', 'artist', 'album']
         self.tag_data = {}
         for tag in self.tags:
@@ -49,12 +49,20 @@ class MainWindow(tk.Frame):
 
         self.gather_data(path)
         self.show_data()
+        database.session.commit()
 
     def gather_data(self, path):
+        self.tracks = []
+
         for file in glob.glob(os.path.join(path, '*.flac')):
+            self.tracks.append(database.Track())
+
             for tag in self.tags:
                 value = metaflac.get_attribute(tag, file)
                 self.tag_data[tag].append(value)
+                setattr(self.tracks[-1], tag, value)
+
+            database.session.add(self.tracks[-1])
 
     def show_data(self):
         i = 0
@@ -76,9 +84,11 @@ def main():
     root.iconbitmap('flac-librarian.ico')
     icon.delete_icon()
 
+    database.init()
+
     root.mainloop()
 
-profile = True
+profile = False
 if __name__ == '__main__':
     if profile:
         cProfile.run('main()')
